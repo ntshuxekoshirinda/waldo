@@ -1,6 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common';
-import { GameService } from './game.service';
-import { ValidateClickDto } from './dto/validate-click.dto';
+import { GameService } from './game.service.js';
+import { ValidateClickDto } from './dto/validate-click.dto.js';
 
 @Controller('game')
 export class GameController {

@@ -1,27 +1,31 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service'; // Assuming you have a Prisma module
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { Character } from '../generated/prisma/client.js'; 
 
 @Injectable()
 export class GameService {
   constructor(private prisma: PrismaService) {}
 
-  async validateClick(characterName: string, clickX: number, clickY: number) {
+  async validateClick(characterName: string, clickedX: number, clickedY: number) {
+    // 1. Fetch the target character's true coordinates from Neon
     const character = await this.prisma.character.findUnique({
-      where: { name: characterName },
+      where: { name: characterName }, // Assumes 'name' is unique in your schema
     });
 
-    if (!character) return { correct: false };
+    if (!character) {
+      throw new NotFoundException(`Character ${characterName} not found.`);
+    }
 
-    const margin = 3.0; // 3% wiggle room
-    const xDiff = Math.abs(character.targetX - clickX);
-    const yDiff = Math.abs(character.targetY - clickY);
+    // 2. Define a click tolerance window (e.g., within 20 pixels)
+    const tolerance = 20; 
+    const xMatches = Math.abs(character.x - clickedX) <= tolerance;
+    const yMatches = Math.abs(character.y - clickedY) <= tolerance;
 
-    const isCorrect = xDiff <= margin && yDiff <= margin;
+    // 3. Return the evaluation result to the controller
+    if (xMatches && yMatches) {
+      return { found: true, message: `Correct! You found ${characterName}!` };
+    }
 
-    return {
-      correct: isCorrect,
-      // If correct, return coordinates so frontend can place a permanent marker
-      location: isCorrect ? { x: character.targetX, y: character.targetY } : null,
-    };
+    return { found: false, message: 'Keep looking!' };
   }
 }
