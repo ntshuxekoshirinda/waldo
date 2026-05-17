@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { Character } from '../generated/prisma/client.js'; 
+import { Character } from '@prisma/client';
 
 @Injectable()
 export class GameService {
@@ -18,8 +19,8 @@ export class GameService {
 
     // 2. Define a click tolerance window (e.g., within 20 pixels)
     const tolerance = 20; 
-    const xMatches = Math.abs(character.x - clickedX) <= tolerance;
-    const yMatches = Math.abs(character.y - clickedY) <= tolerance;
+    const xMatches = Math.abs(character.targetX - clickedX) <= tolerance;
+    const yMatches = Math.abs(character.targetY - clickedY) <= tolerance;
 
     // 3. Return the evaluation result to the controller
     if (xMatches && yMatches) {
